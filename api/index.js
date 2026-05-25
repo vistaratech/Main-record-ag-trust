@@ -15,6 +15,9 @@ app.use(express.json({ limit: '100mb' }));
 const connectionString = process.env.DATABASE_URL || 'postgresql://neondb_owner:npg_9EBoxFjQgZ5U@ep-floral-thunder-aosbcmz9.c-2.ap-southeast-1.aws.neon.tech/neondb?sslmode=require';
 const pool = new Pool({
   connectionString,
+  max: 20, // Reuse up to 20 database connections for superspeed performance
+  idleTimeoutMillis: 30000, // Keep connections alive for 30 seconds for immediate reuse
+  connectionTimeoutMillis: 2000, // Return fast if connection times out
   ssl: { rejectUnauthorized: false }
 });
 
