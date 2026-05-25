@@ -64,10 +64,10 @@ export default function AdminActivityPage() {
     setLoading(true);
     try {
       const [actData, userData] = await Promise.all([
-        firebaseGetActivity(500),
+        firebaseGetActivity(''),
         firebaseGetUsers()
       ]);
-      setActivities(actData.activities || []);
+      setActivities(actData || []);
       setUsers((userData.users || []).map((u: any) => ({ id: u.id, name: u.name, email: u.email })));
     }
     catch { } finally { setLoading(false); }

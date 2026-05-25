@@ -1,4 +1,4 @@
-import { type LucideIcon } from 'lucide-react';
+import React from 'react';
 
 interface CategoryCardProps {
   cat: {
@@ -6,7 +6,7 @@ interface CategoryCardProps {
     icon: string;
     name: string;
   };
-  icon: LucideIcon;
+  icon: any;
   count: number;
   onClick: () => void;
 }

@@ -97,8 +97,8 @@ export default function AdminAnalyticsPage() {
   const fetch_ = async () => {
     setLoading(true);
     try {
-      const [a, u] = await Promise.all([firebaseGetActivity(2000), firebaseGetUsers()]);
-      setActivities(a.activities || []);
+      const [a, u] = await Promise.all([firebaseGetActivity(''), firebaseGetUsers()]);
+      setActivities(a || []);
       setUsers((u.users || []).filter((x: any) => x.role !== 'superadmin'));
     } catch {} finally { setLoading(false); }
   };

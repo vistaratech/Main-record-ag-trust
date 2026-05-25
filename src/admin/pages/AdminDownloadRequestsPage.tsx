@@ -15,7 +15,7 @@ export default function AdminDownloadRequestsPage() {
 
   const fetch_ = async () => {
     setLoading(true);
-    try { const d = await firebaseGetAllDownloadRequests(); setRequests(d.requests||[]); }
+    try { const d = await firebaseGetAllDownloadRequests(); setRequests(d||[]); }
     catch { } finally { setLoading(false); }
   };
   useEffect(() => { fetch_(); }, []);
@@ -41,7 +41,7 @@ export default function AdminDownloadRequestsPage() {
         console.log('Register deleted successfully via request approval');
       }
 
-      await firebaseRespondRequest(id, status, adminNote, user?.name || user?.email || 'Admin');
+      await firebaseRespondRequest(undefined, id, { status, responseNote: adminNote });
       setRespondingTo(null); setAdminNote(''); fetch_();
     } catch(e:any) { 
       alert(`Action failed: ${e.message}`); 

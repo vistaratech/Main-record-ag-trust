@@ -148,13 +148,13 @@ export function useExport({
     entriesToExport.forEach((entry) => {
       const rowData: any[] = [entry.rowNumber.toString()];
       visibleColumns.forEach(c => {
-        let val = c.type === 'formula'
+        let val: any = c.type === 'formula'
           ? evaluateFormula(c.formula || '', entry, columns)
           : (entry.cells?.[c.id.toString()] || '');
 
         if (c.type === 'image' && val) {
           const urls = val.includes('|||') ? val.split('|||') : [val];
-          const cleanUrls = urls.map(url => {
+          const cleanUrls = urls.map((url: string) => {
             if (url.startsWith('data:image/')) {
               return null;
             }
@@ -551,13 +551,13 @@ export function useExport({
     try {
       const headerRow = ['S.No.', ...visibleCols.map(c => c.name)];
       const dataRow = [entry.rowNumber.toString(), ...visibleCols.map(c => {
-        let val = c.type === 'formula'
+        let val: any = c.type === 'formula'
           ? evaluateFormula(c.formula || '', entry, columns)
           : (entry.cells?.[c.id.toString()] || '');
 
         if (c.type === 'image' && val) {
           const urls = val.includes('|||') ? val.split('|||') : [val];
-          const cleanUrls = urls.map(url => {
+          const cleanUrls = urls.map((url: string) => {
             if (url.startsWith('data:image/')) {
               return null;
             }

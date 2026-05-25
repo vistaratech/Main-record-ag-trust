@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, FileText, Eye, type LucideIcon } from 'lucide-react';
+import { X, FileText, Eye } from 'lucide-react';
 import { type Template } from '../../lib/templates';
 
 interface TemplateModalProps {
@@ -10,7 +10,7 @@ interface TemplateModalProps {
   creatingTemplate: string | null;
   handleCreate: (tpl: Template) => void;
   getColTypeIcon: (type: string) => React.ReactNode;
-  ICON_MAP: Record<string, LucideIcon>;
+  ICON_MAP: Record<string, any>;
 }
 
 export function TemplateModal(props: TemplateModalProps) {

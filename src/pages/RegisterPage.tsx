@@ -84,7 +84,7 @@ export default function RegisterPage() {
   // Helper to log workspace actions for activity tracking
   const _logWork = useCallback((action: string, details: string) => {
     if (user?.id) {
-      firebaseLogWorkspaceAction(user.id as string, (user as any)?.name || user?.email || 'Unknown', action, details);
+      firebaseLogWorkspaceAction(undefined, { userId: user.id as string, userName: (user as any)?.name || user?.email || 'Unknown', action, details });
     }
   }, [user]);
 

@@ -20,7 +20,7 @@ export default function AdminDashboard() {
   }, []);
 
   const handleLogout = async () => {
-    try { await firebaseLogout(token!); } catch (e) {}
+    try { await firebaseLogout(); } catch (e) {}
     sessionStorage.removeItem('admin_workspace_mode');
     logout();
     navigate('/admin/login');

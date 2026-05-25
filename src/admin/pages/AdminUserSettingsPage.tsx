@@ -140,7 +140,7 @@ export default function AdminUserSettingsPage() {
       };
       
       console.log('[SAVE] Updating permissions for:', user.name, newPerms);
-      await firebaseUpdatePermissions(user.id, newPerms);
+      await firebaseUpdatePermissions(undefined, user.id, newPerms);
       if (!silent) addNotification({ title: 'Success', message: 'User settings saved successfully!', type: 'success' });
       setUser({ ...user, permissions: newPerms });
     } catch (err: any) {
@@ -176,7 +176,7 @@ export default function AdminUserSettingsPage() {
       return; 
     }
     try {
-      await firebaseAdminChangePassword(user.id, newPw);
+      await firebaseAdminChangePassword(undefined, user.id, newPw);
       setNewPw('');
       addNotification({ title: 'Success', message: 'Password changed successfully', type: 'success' });
     } catch (err: any) {
@@ -264,8 +264,8 @@ export default function AdminUserSettingsPage() {
                     const newPerms = r.value === 'admin'
                       ? { ...globalPerms, canView: true, canEdit: true, canDownload: true, isAdmin: true, fullSheetAccess: true, canCreateSheets: true }
                       : { ...globalPerms, fullSheetAccess: false, isAdmin: false };
-                    await firebaseUpdateUser(user.id, { role: r.value });
-                    await firebaseUpdatePermissions(user.id, { ...user.permissions, ...newPerms });
+                    await firebaseUpdateUser(undefined, user.id, { role: r.value, name: user.name || '', status: user.status || 'active' });
+                    await firebaseUpdatePermissions(undefined, user.id, { ...user.permissions, ...newPerms });
                     setUserRole(r.value);
                     setGlobalPerms(newPerms);
                     setUser({ ...user, role: r.value, permissions: { ...user.permissions, ...newPerms } });
@@ -305,7 +305,7 @@ export default function AdminUserSettingsPage() {
                   const newVal = !(globalPerms as any).fullSheetAccess;
                   const newPerms = { ...globalPerms, fullSheetAccess: newVal };
                   try {
-                    await firebaseUpdatePermissions(user.id, { ...user.permissions, ...newPerms });
+                    await firebaseUpdatePermissions(undefined, user.id, { ...user.permissions, ...newPerms });
                     setGlobalPerms(newPerms);
                     setUser({ ...user, permissions: { ...user.permissions, ...newPerms } });
                     addNotification({ title: newVal ? 'Full Access Enabled' : 'Full Access Disabled', message: newVal ? `${user.name} now has access to all sheets & folders` : `${user.name} now uses granular permissions only`, type: 'success' });
