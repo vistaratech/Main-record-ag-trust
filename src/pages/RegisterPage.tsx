@@ -114,8 +114,9 @@ export default function RegisterPage() {
     queryKey: ['register', registerId],
     queryFn: () => getRegister(Number(registerId)),
     enabled: !!registerId && !isNaN(Number(registerId)),
-    staleTime: 30 * 1000,
-    refetchOnWindowFocus: false,
+    staleTime: 5 * 1000, // 5 seconds stale time for live responsiveness
+    refetchInterval: 8000, // Live query subscription: refetch every 8 seconds to reflect background edits instantly
+    refetchOnWindowFocus: true, // Refetch when user returns to window for immediate synchronization
     placeholderData: keepPreviousData,
   });
 

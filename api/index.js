@@ -721,14 +721,19 @@ app.post('/api/registers', async (req, res) => {
         ]);
       }
       
-      // Insert 10 default empty entries if columns exist
+      // Insert 10 default empty entries in one single batch query for maximum speed
+      const entryValues = [];
+      const valuePlaceholders = [];
       for (let i = 0; i < 10; i++) {
         const entryId = registerId + 5000 + i;
-        await pool.query(`
-          INSERT INTO entries (id, register_id, row_number, cells, cell_styles, page_index, created_at)
-          VALUES ($1, $2, $3, '{}'::jsonb, '{}'::jsonb, 0, NOW())
-        `, [entryId, registerId, i + 1]);
+        const baseIdx = i * 3;
+        valuePlaceholders.push(`($${baseIdx + 1}, $${baseIdx + 2}, $${baseIdx + 3}, '{}'::jsonb, '{}'::jsonb, 0, NOW())`);
+        entryValues.push(entryId, registerId, i + 1);
       }
+      await pool.query(`
+        INSERT INTO entries (id, register_id, row_number, cells, cell_styles, page_index, created_at)
+        VALUES ${valuePlaceholders.join(', ')}
+      `, entryValues);
     }
     
     await pool.query('COMMIT');
@@ -783,47 +788,63 @@ app.put('/api/registers/:id', async (req, res) => {
       registerId
     ]);
 
-    // 2. Overwrite Columns
+    // 2. Overwrite Columns via optimized batch insert
     if (reg.columns && Array.isArray(reg.columns)) {
       await pool.query('DELETE FROM columns WHERE register_id = $1', [registerId]);
-      for (const col of reg.columns) {
+      if (reg.columns.length > 0) {
+        const colValues = [];
+        const placeholders = [];
+        for (let i = 0; i < reg.columns.length; i++) {
+          const col = reg.columns[i];
+          const base = i * 12;
+          placeholders.push(`($${base + 1}, $${base + 2}, $${base + 3}, $${base + 4}, $${base + 5}, $${base + 6}, $${base + 7}, $${base + 8}, $${base + 9}, $${base + 10}, $${base + 11}, $${base + 12})`);
+          colValues.push(
+            Number(col.id),
+            registerId,
+            col.name,
+            col.type,
+            col.position ?? 0,
+            JSON.stringify(col.dropdownOptions || []),
+            col.formula || null,
+            col.width || null,
+            col.summary || null,
+            col.linkedTo ? JSON.stringify(col.linkedTo) : null,
+            !!col.mandatory,
+            !!col.unique
+          );
+        }
         await pool.query(`
           INSERT INTO columns (
             id, register_id, name, type, position, dropdown_options, formula, width, summary, linked_to, mandatory, unique_col
-          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
-        `, [
-          Number(col.id),
-          registerId,
-          col.name,
-          col.type,
-          col.position ?? 0,
-          JSON.stringify(col.dropdownOptions || []),
-          col.formula || null,
-          col.width || null,
-          col.summary || null,
-          col.linkedTo ? JSON.stringify(col.linkedTo) : null,
-          !!col.mandatory,
-          !!col.unique
-        ]);
+          ) VALUES ${placeholders.join(', ')}
+        `, colValues);
       }
     }
 
-    // 3. Overwrite Entries (spreadsheet rows)
+    // 3. Overwrite Entries (spreadsheet rows) via optimized batch insert
     if (reg.entries && Array.isArray(reg.entries)) {
       await pool.query('DELETE FROM entries WHERE register_id = $1', [registerId]);
-      for (const entry of reg.entries) {
+      if (reg.entries.length > 0) {
+        const entryValues = [];
+        const placeholders = [];
+        for (let i = 0; i < reg.entries.length; i++) {
+          const entry = reg.entries[i];
+          const base = i * 7;
+          placeholders.push(`($${base + 1}, $${base + 2}, $${base + 3}, $${base + 4}, $${base + 5}, $${base + 6}, $${base + 7})`);
+          entryValues.push(
+            Number(entry.id),
+            registerId,
+            Number(entry.rowNumber),
+            JSON.stringify(entry.cells || {}),
+            JSON.stringify(entry.cellStyles || {}),
+            Number(entry.pageIndex ?? 0),
+            entry.createdAt || new Date().toISOString()
+          );
+        }
         await pool.query(`
           INSERT INTO entries (id, register_id, row_number, cells, cell_styles, page_index, created_at)
-          VALUES ($1, $2, $3, $4, $5, $6, $7)
-        `, [
-          Number(entry.id),
-          registerId,
-          Number(entry.rowNumber),
-          JSON.stringify(entry.cells || {}),
-          JSON.stringify(entry.cellStyles || {}),
-          Number(entry.pageIndex ?? 0),
-          entry.createdAt || new Date().toISOString()
-        ]);
+          VALUES ${placeholders.join(', ')}
+        `, entryValues);
       }
     }
 
